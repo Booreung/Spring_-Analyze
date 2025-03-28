@@ -1,3 +1,12 @@
+# HTTP 요청 감지 (UI -> Controller 추적) -> Mitmproxy 활용
+# 목표 : 실제 브라우저에서 UI 이벤트가 발생하면 자동으로 감지
+# 방법 : Mitmproxy를 이용해서 HTTP 요청을 가로채기
+# 결과 : 어떤 URL이 호출되었는지 실시간 출력
+# 작성자 : smkim060811@gmail.com
+
+# Trouble : Port 문제 발생
+# 해결방법 : mitmproxy를 작동해야하는 프로그램과 같은 포트가 아닌 다른 포트에서 실행 -> 목표 포트에서 오는 요청을 대체 포트를 통해 프록시로 전달하는 방식 사용
+
 from mitmproxy import http, ctx
 from datetime import datetime
 import json
