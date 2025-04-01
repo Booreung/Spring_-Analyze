@@ -11,17 +11,6 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 
-## sample
-log_lines = [
-    "2025-03-31 09:20:42,482 DEBUG [efc.b.lo.bi.controller.LnAplcController] ",
-    "2025-03-31 09:20:42,483 DEBUG [efc.b.lo.dao.qc.Qblo200m_01DAO] ======================retrieveLnAplcList===================",
-    "2025-03-31 09:20:42,503 DEBUG [java.sql.PreparedStatement] SELECT /* SQL_ID: Qblo200m_01DAO.retrieveLnAplcList */",
-    "2025-03-31 09:20:42,600 DEBUG [java.sql.PreparedStatement] UPDATE /* SQL_ID: Qblo300m_02DAO.updateLoanStatus */",
-    "2025-03-31 09:20:42,700 DEBUG [java.sql.PreparedStatement] INSERT /* SQL_ID: Qblo400m_03DAO.insertNewLoan */",
-    "2025-03-31 09:20:42,800 DEBUG [java.sql.PreparedStatement] DELETE /* SQL_ID: Qblo500m_04DAO.deleteOldRecords */"
-]
-
-
 # 로그 파일 경로 설정 (프로젝트의 로그 파일)
 # LOG_FILE_PATH = "/efc_dev/logs/application.log"
 LOG_FILE_PATH = "/efc_dev/logs/application.log"
