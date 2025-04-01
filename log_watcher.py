@@ -8,9 +8,9 @@
 # 해결방법 : 자바의 로그를 찍어주는 log4j에서 로그가 console에만 나오지 않게 appender를 추가 시켜서 파일 형식으로 저장을 성공함
 
 
-import re
 import time
 import os
+import re
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -21,61 +21,59 @@ LOG_DIR = os.path.dirname(LOG_FILE_PATH)
 # 정규식 패턴 (Controller → DAO → SQL 추적)
 patterns = {
     "controller": re.compile(r"\[\s*([\w\d_.]+controller)\.([\w\d_]+)?\s*\]", re.IGNORECASE),
-    "dao": re.compile(r"\[([\w\d_.]+dao.[\w\d_]+)\]\s+=+([\w\d_]+)=+", re.IGNORECASE),
+    "dao": re.compile(r"\[([\w\d_.]+dao)\.([\w\d_]+)\]\s+=+([\w\d_]+)=+", re.IGNORECASE),
     "sql": re.compile(r"(SELECT|UPDATE|INSERT|DELETE).*SQL_ID:\s+([\w\d_.]+)\.(\w+)", re.IGNORECASE)
 }
 
 class LogHandler(FileSystemEventHandler):
+    def __init__(self):
+        self.last_position = 0  # 마지막으로 읽은 위치
+
     def on_modified(self, event):
         if not event.is_directory and event.src_path.endswith("application.log"):
             with open(LOG_FILE_PATH, "r", encoding="utf-8") as f:
-                lines = f.readlines()
+                f.seek(self.last_position)  # 마지막 읽은 위치부터 읽기
+                new_lines = f.readlines()
+                self.last_position = f.tell()  # 현재 파일 위치 저장
 
-            execution_flows = []  # 실행 흐름을 리스트로 저장
+            if not new_lines:
+                return  # 새로운 로그가 없으면 리턴
+
+            execution_flows = []  # 실행 흐름 리스트
             temp_flow = {"controller": None, "dao": None, "sql": []}
 
-            for line in lines:
+            for line in new_lines:
                 if match := patterns["controller"].search(line):
                     if temp_flow["controller"]:
                         execution_flows.append(temp_flow)  # 이전 흐름 저장
                         temp_flow = {"controller": None, "dao": None, "sql": []}
 
-                    temp_flow["controller"] = {
-                        "class": match.group(1),
-                        "function": match.group(2) if match.group(2) else "Unknown"
-                    }
+                    temp_flow["controller"] = f"{match.group(1)}.{match.group(2) if match.group(2) else 'Unknown'}"
 
                 elif match := patterns["dao"].search(line):
-                    temp_flow["dao"] = {
-                        "class": match.group(1),
-                        "method": match.group(2)
-                    }
+                    temp_flow["dao"] = f"{match.group(1)}.{match.group(2)}"
 
                 elif match := patterns["sql"].search(line):
-                    temp_flow["sql"].append({
-                        "query_type": match.group(1),
-                        "class": match.group(2),
-                        "method": match.group(3)
-                    })
+                    temp_flow["sql"].append(f"{match.group(2)}.{match.group(3)}")
 
             if temp_flow["controller"]:
                 execution_flows.append(temp_flow)  
 
-            #  실행 흐름 출력
+            # 실행 흐름 출력
             if execution_flows:
                 print("\n### 실행 흐름 추적 결과 ###")
                 for flow in execution_flows:
-                    result = {}
-
+                    result = []
                     if flow["controller"]:
-                        result["Controller"] = flow["controller"]
+                        result.append(f"Controller: {flow['controller']}")
                     if flow["dao"]:
-                        result["DAO"] = flow["dao"]
+                        result.append(f"DAO: {flow['dao']}")
                     if flow["sql"]:
-                        result["SQL"] = flow["sql"]
+                        result.append(f"SQL: {', '.join(flow['sql'])}")
 
-                    print(f"=>> {result}")
+                    print(" -> ".join(result))
 
+# 파일 감시 설정
 observer = Observer()
 event_handler = LogHandler()
 observer.schedule(event_handler, path=LOG_DIR, recursive=False)
