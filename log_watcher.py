@@ -13,7 +13,7 @@ from watchdog.events import FileSystemEventHandler
 
 ## sample
 log_lines = [
-    "2025-03-31 09:20:42,482 DEBUG [efc.b.lo.bi.controller.LnAplcController] ★★= 융자신청현황조회",
+    "2025-03-31 09:20:42,482 DEBUG [efc.b.lo.bi.controller.LnAplcController] ",
     "2025-03-31 09:20:42,483 DEBUG [efc.b.lo.dao.qc.Qblo200m_01DAO] ======================retrieveLnAplcList===================",
     "2025-03-31 09:20:42,503 DEBUG [java.sql.PreparedStatement] SELECT /* SQL_ID: Qblo200m_01DAO.retrieveLnAplcList */",
     "2025-03-31 09:20:42,600 DEBUG [java.sql.PreparedStatement] UPDATE /* SQL_ID: Qblo300m_02DAO.updateLoanStatus */",
@@ -23,7 +23,8 @@ log_lines = [
 
 
 # 로그 파일 경로 설정 (프로젝트의 로그 파일)
-LOG_FILE_PATH = ""
+# LOG_FILE_PATH = "/efc_dev/logs/application.log"
+LOG_FILE_PATH = "/efc_dev/logs/application.log"
 
 
 # 로그 정규식 패턴
