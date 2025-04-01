@@ -4,70 +4,83 @@
 # 결과 : Controller -> Service -> DAO 실행 흐름 자동 감지
 # 작성자 : smkim060811@gmail.com
 
+# Trouble : 로그를 파일로 남기는 것에서 어려움이 있었음 , 파일의 변경시점마다 변화를 감지하는건 그다지 어렵지 않은 코드
+# 해결방법 : 자바의 로그를 찍어주는 log4j에서 로그가 console에만 나오지 않게 appender를 추가 시켜서 파일 형식으로 저장을 성공함
+
 
 import re
 import time
+import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-
-# 로그 파일 경로 설정 (프로젝트의 로그 파일)
-# LOG_FILE_PATH = "/efc_dev/logs/application.log"
+# 로그 파일 경로
 LOG_FILE_PATH = "/efc_dev/logs/application.log"
+LOG_DIR = os.path.dirname(LOG_FILE_PATH)
 
-
-# 로그 정규식 패턴
+# 정규식 패턴 (Controller → DAO → SQL 추적)
 patterns = {
-    "controller": re.compile(r"\[\s*([\w\d_.]+controller\.[\w\d_]+)\s*\]"),
-    "dao": re.compile(r"\[([\w\d_.]+dao.[\w\d_]+)\]\s+=+([\w\d_]+)=+"),
+    "controller": re.compile(r"\[\s*([\w\d_.]+controller)\.([\w\d_]+)?\s*\]", re.IGNORECASE),
+    "dao": re.compile(r"\[([\w\d_.]+dao.[\w\d_]+)\]\s+=+([\w\d_]+)=+", re.IGNORECASE),
     "sql": re.compile(r"(SELECT|UPDATE|INSERT|DELETE).*SQL_ID:\s+([\w\d_.]+)\.(\w+)", re.IGNORECASE)
 }
 
 class LogHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        if event.src_path == LOG_FILE_PATH:
+        if not event.is_directory and event.src_path.endswith("application.log"):
             with open(LOG_FILE_PATH, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            excution_flow = {
-                "controller" : None,
-                "dao" : None,
-                "sql" : []
-            }
+            execution_flows = []  # 실행 흐름을 리스트로 저장
+            temp_flow = {"controller": None, "dao": None, "sql": []}
 
-            # 최신 로그에서 실행 흐름 추출
-            for line in lines[-50]: # 최근 50줄만
+            for line in lines:
                 if match := patterns["controller"].search(line):
-                    excution_flow["controller"] = {
-                        "class" : match.group(1),
-                        "funtion" : match.group(2)
+                    if temp_flow["controller"]:
+                        execution_flows.append(temp_flow)  # 이전 흐름 저장
+                        temp_flow = {"controller": None, "dao": None, "sql": []}
+
+                    temp_flow["controller"] = {
+                        "class": match.group(1),
+                        "function": match.group(2) if match.group(2) else "Unknown"
                     }
+
                 elif match := patterns["dao"].search(line):
-                    excution_flow["dao"] = {
-                        "class" : match.group(1),
-                        "method" : match.group(2)
+                    temp_flow["dao"] = {
+                        "class": match.group(1),
+                        "method": match.group(2)
                     }
+
                 elif match := patterns["sql"].search(line):
-                    excution_flow["sql"].append({
-                        "class" : match.group(1),
-                        "method" : match.group(2)
+                    temp_flow["sql"].append({
+                        "query_type": match.group(1),
+                        "class": match.group(2),
+                        "method": match.group(3)
                     })
 
-            # 결과 출력
-            print("\n ### 실행 흐름 추적 결과")
-            for key, value in excution_flow.items():
-                if value:
-                    print(f"=>> {key.capitalize()} -> {value}")  
+            if temp_flow["controller"]:
+                execution_flows.append(temp_flow)  
 
+            #  실행 흐름 출력
+            if execution_flows:
+                print("\n### 실행 흐름 추적 결과 ###")
+                for flow in execution_flows:
+                    result = {}
 
-# 파일 감시 설정
+                    if flow["controller"]:
+                        result["Controller"] = flow["controller"]
+                    if flow["dao"]:
+                        result["DAO"] = flow["dao"]
+                    if flow["sql"]:
+                        result["SQL"] = flow["sql"]
+
+                    print(f"=>> {result}")
+
 observer = Observer()
 event_handler = LogHandler()
-observer.schedule(event_handler, path=LOG_FILE_PATH, recursive=False)
+observer.schedule(event_handler, path=LOG_DIR, recursive=False)
 observer.start()
 
-
-# 로그 감지 시작
 try:
     print("## 로그 감지 시작 ##")
     while True:
