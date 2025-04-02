@@ -13,15 +13,20 @@ import os
 import re
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import json
 
 # 로그 파일 경로
 LOG_FILE_PATH = "/efc_dev/logs/application.log"
 LOG_DIR = os.path.dirname(LOG_FILE_PATH)
 
+# 로그 -> json 저장 파일
+LOG_OUTPUT_PATH = "execution_flow.json"
+
 # 정규식 패턴 (Controller → DAO → SQL 추적)
 patterns = {
     "controller": re.compile(r"\[\s*([\w\d_.]+controller)\.([\w\d_]+)?\s*\]", re.IGNORECASE),
     "dao": re.compile(r"\[([\w\d_.]+dao)\.([\w\d_]+)\]\s+=+([\w\d_]+)=+", re.IGNORECASE),
+    "service" : re.compile(r"\[([\w\d_.]+service)\.([\w\d_]+)\]\s+=+([\w\d_]+)=+", re.IGNORECASE),
     "sql": re.compile(r"(SELECT|UPDATE|INSERT|DELETE).*SQL_ID:\s+([\w\d_.]+)\.(\w+)", re.IGNORECASE)
 }
 
@@ -40,15 +45,18 @@ class LogHandler(FileSystemEventHandler):
                 return  # 새로운 로그가 없으면 리턴
 
             execution_flows = []  # 실행 흐름 리스트
-            temp_flow = {"controller": None, "dao": None, "sql": []}
+            temp_flow = {"controller": None, "service" : None , "dao": None, "sql": []}
 
             for line in new_lines:
                 if match := patterns["controller"].search(line):
                     if temp_flow["controller"]:
                         execution_flows.append(temp_flow)  # 이전 흐름 저장
-                        temp_flow = {"controller": None, "dao": None, "sql": []}
+                        temp_flow = {"controller": None, "service" : None , "dao": None, "sql": []}
 
                     temp_flow["controller"] = f"{match.group(1)}.{match.group(2) if match.group(2) else 'Unknown'}"
+
+                elif match := patterns["service"].search(line):
+                    temp_flow["service"] = f"{match.group(1)}.{match.group(2)}"
 
                 elif match := patterns["dao"].search(line):
                     temp_flow["dao"] = f"{match.group(1)}.{match.group(2)}"
@@ -66,12 +74,24 @@ class LogHandler(FileSystemEventHandler):
                     result = []
                     if flow["controller"]:
                         result.append(f"Controller: {flow['controller']}")
+                    if flow["service"]:
+                        result.append(f"Service: {flow['service']}")
                     if flow["dao"]:
                         result.append(f"DAO: {flow['dao']}")
                     if flow["sql"]:
                         result.append(f"SQL: {', '.join(flow['sql'])}")
 
                     print(" -> ".join(result))
+
+
+            #실행 흐름 Json 저장
+            if execution_flows:
+                print(f"### 실행 흐름 저장 시작 : {LOG_OUTPUT_PATH}")
+                with open(LOG_OUTPUT_PATH, "w", encoding="utf-8") as json_file:
+                    json.dump(execution_flows, json_file, indent=4)
+                
+                print(f"### 실행 흐름 저장 완료 : {LOG_OUTPUT_PATH}")
+
 
 # 파일 감시 설정
 observer = Observer()
