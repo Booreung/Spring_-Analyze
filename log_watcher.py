@@ -114,7 +114,7 @@ class LogHandler(FileSystemEventHandler):
                     if flow["dao"]:
                         result.append(f"DAO: {flow['dao']}")
                     if flow["sql"]:
-                        sql_strings = [f"{sql['query_type']}.{sql['class']}.{sql['method']}" for sql in flow["sql"]]
+                        sql_strings = [f"{sql['query_type']}.{sql['class']}.{sql['method']}\n" for sql in flow["sql"]]
                         result.append(f"SQL: {', '.join(sql_strings)}")
 
                     print(" -> ".join(result))

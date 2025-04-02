@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring 실행 흐름 대시보드</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #flow-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .flow-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+        .flow-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Spring 실행 흐름 대시보드</h1>
+    <div id="flow-container">
+        <p>실행 흐름 데이터를 불러오는 중...</p>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $.getJSON("/data", function(data) {
+                let container = $("#flow-container");
+                container.empty();
+
+                if (data.length === 0) {
+                    container.append("<p>실행 흐름 데이터가 없습니다.</p>");
+                    return;
+                }
+
+                data.forEach((flow, index) => {
+                    let flowHtml = `<div class="flow-item">
+                        <strong>실행 흐름 #${index + 1}</strong><br>`;
+
+                    if (flow.controller) {
+                        flowHtml += `<strong>Controller:</strong> ${flow.controller.class}.${flow.controller.function} <br>`;
+                    }
+                    if (flow.service) {
+                        flowHtml += `<strong>Service:</strong> ${flow.service.class}.${flow.service.method} <br>`;
+                    }
+                    if (flow.dao) {
+                        flowHtml += `<strong>DAO:</strong> ${flow.dao.class}.${flow.dao.method} <br>`;
+                    }
+                    if (flow.sql && flow.sql.length > 0) {
+                        flowHtml += `<strong>SQL:</strong> `;
+                        flow.sql.forEach(sql => {
+                            flowHtml += `${sql.query_type} - ${sql.class}.${sql.method} `;
+                        });
+                        flowHtml += `<br>`;
+                    }
+
+                    flowHtml += `</div>`;
+                    container.append(flowHtml);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
