@@ -53,16 +53,29 @@ class LogHandler(FileSystemEventHandler):
                         execution_flows.append(temp_flow)  # 이전 흐름 저장
                         temp_flow = {"controller": None, "service" : None , "dao": None, "sql": []}
 
-                    temp_flow["controller"] = f"{match.group(1)}.{match.group(2) if match.group(2) else 'Unknown'}"
-
+                    temp_flow["controller"] = {
+                        "class": match.group(1),
+                        "function": match.group(2) if match.group(2) else "Unknown"
+                    }
                 elif match := patterns["service"].search(line):
-                    temp_flow["service"] = f"{match.group(1)}.{match.group(2)}"
+                    temp_flow["service"] = {
+                        "class": match.group(1),
+                        "method": match.group(2)
+                    }
 
                 elif match := patterns["dao"].search(line):
-                    temp_flow["dao"] = f"{match.group(1)}.{match.group(2)}"
+                    temp_flow["dao"] = {
+                        "class": match.group(1),
+                        "method": match.group(2)
+                    }
 
                 elif match := patterns["sql"].search(line):
-                    temp_flow["sql"].append(f"{match.group(2)}.{match.group(3)}")
+                    temp_flow["sql"].append({
+                        "query_type": match.group(1),
+                        "class": match.group(2),
+                        "method": match.group(3)
+                    })
+
 
             if temp_flow["controller"]:
                 execution_flows.append(temp_flow)  
@@ -79,7 +92,8 @@ class LogHandler(FileSystemEventHandler):
                     if flow["dao"]:
                         result.append(f"DAO: {flow['dao']}")
                     if flow["sql"]:
-                        result.append(f"SQL: {', '.join(flow['sql'])}")
+                        sql_strings = [f"{sql['query_type']}.{sql['class']}.{sql['method']}" for sql in flow["sql"]]
+                        result.append(f"SQL: {', '.join(sql_strings)}")
 
                     print(" -> ".join(result))
 
