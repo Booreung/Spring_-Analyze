@@ -4,6 +4,9 @@
 # 결과 : UI -> Controller -> Service -> DAO -> SQL 실행 흐름이 시각화됨
 # 작성자 : smkim060811@gmail.com
 
+# Trouble : 디자인 문제 -> 크기를 키우자니 글씨가 깨지고 글씨를 유지하자니 크기가 너무 작아진다
+# 해결방법 : 없음.. 그냥 확대해서 보는게 제일 머리가 안아프다.
+
 import json
 import networkx as nx
 import matplotlib.pyplot as plt
