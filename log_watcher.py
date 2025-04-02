@@ -30,6 +30,28 @@ patterns = {
     "sql": re.compile(r"(SELECT|UPDATE|INSERT|DELETE).*SQL_ID:\s+([\w\d_.]+)\.(\w+)", re.IGNORECASE)
 }
 
+
+# 실행 흐름 JSON 저장(누적방식)
+def save_execution_flow(execution_flows):
+    # 데이터 불러오기
+    if os.path.exists(LOG_OUTPUT_PATH):
+        print("### 실행 흐름을 저장하겠습니다. 데이터를 읽기 시작")
+        with open(LOG_OUTPUT_PATH, "r", encoding="utf-8") as f:
+            try:
+                existing_data = json.load(f)
+            except json.JSONDecodeError:
+                existing_data = []
+                print("### 데이터 읽기 실패")
+    else:
+        existing_data = []
+
+    # 새 실행 흐름 추가
+    with open(LOG_OUTPUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(existing_data, f, ensure_ascii=False, indent=4)
+
+    print(f"### 실행 흐름이 {LOG_OUTPUT_PATH}에 누적 저장되었습니다.")
+
+
 class LogHandler(FileSystemEventHandler):
     def __init__(self):
         self.last_position = 0  # 마지막으로 읽은 위치
@@ -100,11 +122,7 @@ class LogHandler(FileSystemEventHandler):
 
             #실행 흐름 Json 저장
             if execution_flows:
-                print(f"### 실행 흐름 저장 시작 : {LOG_OUTPUT_PATH}")
-                with open(LOG_OUTPUT_PATH, "w", encoding="utf-8") as json_file:
-                    json.dump(execution_flows, json_file, indent=4)
-                
-                print(f"### 실행 흐름 저장 완료 : {LOG_OUTPUT_PATH}")
+                save_execution_flow(execution_flows)
 
 
 # 파일 감시 설정
