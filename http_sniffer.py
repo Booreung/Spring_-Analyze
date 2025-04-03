@@ -102,5 +102,5 @@ addons = [HttpSniffer()]
 
 
 
-## mitmproxy --mode reverse:http://localhost:8082 -p 8083 -s http_sniffer.py
+## mitmproxy --mode reverse:http://localhost:8082 -p 8080 -s http_sniffer.py
 ## mitmproxy를 직접 8082에서 실행하는 것이 아니라, 다른 포트(8080)에서 실행하고, 8082에서 오는 요청을 8080을 통해 프록시로 전달하는 방식
