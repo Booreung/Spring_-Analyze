@@ -7,6 +7,10 @@
 # 방법 : subprocess 모듈을 활용해서 각 파일을 백그라운드에서 실행
 #        threading 또는 multithreading을 사용해서 병렬 실행
 
+# Trouble : 모듈로 각 파일을 실행시키는 과정에서 직접 터미널에 입력해서 실행하는 http_sniffer.py 에서의 mitmproxy문제
+# 해결방법 : http_sniffer.py는 모듈화 하지 않고 실행 명령어를 이용해 subproccess.Popen으로 터미널에서 실행하는 것과 같은 환경을 만듦(다른 프로세스로 동작)
+#            기존 명령어인 mitmproxy 로 실행하려니 디코딩 문제가 생겨 mitmdump 명령어로 바꾼 뒤 실행(실행을 블로킹 하지 않는 방법으로 수정)
+
 
 # 주의할점
 # 1. 다른 프로젝트에서 분석을 위해서 이 소스코드를 실행 할 시 http_sniffer.py에 포트 번호 또는 url을 지정해줘야함 (단, loacl일때만 사용할것)
