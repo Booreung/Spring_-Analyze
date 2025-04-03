@@ -36,21 +36,17 @@ MODULES = {
 }
 
 # mitmproxy 실행 명령어
-MITMPROXY_CMD = "mitmdump --mode reverse:http://localhost:8082 -p 8080 -s http_sniffer.py"
+MITMPROXY_CMD_UI = ["mitmproxy", "--mode", "reverse:http://localhost:8082", "-p", "8080", "-s", "http_sniffer.py"]
 
 
 def start_mitmproxy():
     """ mitmproxy 실행 """
     print("### http_sniffer 실행 중...")
     process =  subprocess.Popen(
-        MITMPROXY_CMD,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        encoding="utf-8",  # UTF-8 강제 설정
-        bufsize=1,
-        universal_newlines=True,
-        shell=True
+        MITMPROXY_CMD_UI,
+        creationflags=subprocess.CREATE_NEW_CONSOLE
     )
+    
 
     time.sleep(2)
 
