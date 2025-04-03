@@ -8,8 +8,10 @@
 #        threading 또는 multithreading을 사용해서 병렬 실행
 
 # Trouble : 모듈로 각 파일을 실행시키는 과정에서 직접 터미널에 입력해서 실행하는 http_sniffer.py 에서의 mitmproxy문제
+#           web_dashboard.py 가 실행되지 않는 문제 발생
 # 해결방법 : http_sniffer.py는 모듈화 하지 않고 실행 명령어를 이용해 subproccess.Popen으로 터미널에서 실행하는 것과 같은 환경을 만듦(다른 프로세스로 동작)
-#            기존 명령어인 mitmproxy 로 실행하려니 디코딩 문제가 생겨 mitmdump 명령어로 바꾼 뒤 실행(실행을 블로킹 하지 않는 방법으로 수정)
+#           기존 명령어인 mitmproxy 로 실행하려니 디코딩 문제가 생겨 mitmdump 명령어로 바꾼 뒤 실행(실행을 블로킹 하지 않는 방법으로 수정)
+#           app.py파일 이름을 web_dashboard.py로 변경 뒤 관계 경로로 script를 바꿔주니 해결 -> 하위 폴더가 있는 구조면 맞는 경로를 찾아야함. 
 
 
 # 주의할점
@@ -32,7 +34,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 MODULES = {
     "log_watcher": "log_watcher.py",
     "visualizer": "visualizer.py",
-    "web_dashboard": "web_dashboard.py"
+    "web_dashboard": "web_dashboard\web_dashboard.py"
 }
 
 # mitmproxy 실행 명령어
@@ -47,7 +49,6 @@ def start_mitmproxy():
         creationflags=subprocess.CREATE_NEW_CONSOLE
     )
     
-
     time.sleep(2)
 
     return process
@@ -68,7 +69,7 @@ def start_modules():
         try:
             print(f"### {name} 실행 중...")
             process = subprocess.Popen(
-                ["python", script],
+                [sys.executable, script],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 encoding="utf-8",  # UTF-8 강제 설정
