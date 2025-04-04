@@ -26,6 +26,8 @@ import signal
 import sys
 import datetime
 import threading
+from visualizer import visualize_execution_flow
+import matplotlib.pyplot as plt
 
 # Windows 환경에서 UTF-8 출력 강제 설정
 sys.stdout.reconfigure(encoding="utf-8")
@@ -39,17 +41,6 @@ MODULES = {
 
 # 터미널 실행 명령어
 MITMPROXY_CMD_UI = ["mitmproxy", "--mode", "reverse:http://localhost:8082", "-p", "8080", "-s", "http_sniffer.py"]
-VISUALIZER_CMD = ["python","visualizer.py"]
-
-def start_visualizer():
-    print("### visualizer 실행 중...") 
-    process =  subprocess.Popen(
-        VISUALIZER_CMD,
-        creationflags=subprocess.CREATE_NEW_CONSOLE
-    )
-    time.sleep(2)
-
-    return process
 
 def start_mitmproxy():
     """ mitmproxy 실행 """
@@ -105,11 +96,27 @@ def stop_modules():
         process.wait()
     print("### 모든 모듈이 정상 종료되었습니다.")
 
+
+
 # Ctrl+C (KeyboardInterrupt) 감지 시 종료
 def signal_handler(sig, frame):
     print("\n### Ctrl+C 감지 -> 모든 프로세스 종료")
     stop_modules()
+    mitmproxy_process.terminate()
+    mitmproxy_process.wait()
+
+    # 마지막 실행 그래프 생성 -> 프로그램 동작동안의 최종 결과물 출력
+    print("### 최종 실행 흐름 그래프 생성 중...")
+    visualize_execution_flow()
+    print("### 최종 실행 흐름 그래프 생성 완료")
+    print("### 그래프를 띄우겠습니다.")
+    # Matplotlib으로 이미지 출력
+    plt.imshow(plt.imread("execution_flow.png"))
+    plt.axis("off")
+    plt.show()
+
     sys.exit(0)
+
 
 if __name__ == "__main__":
 
@@ -124,6 +131,4 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         signal_handler(None, None)
-        start_visualizer()
-        mitmproxy_process.terminate()
-        mitmproxy_process.wait()
+        

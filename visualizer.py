@@ -95,7 +95,7 @@ def visualize_execution_flow():
 class JSONFileHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.endswith(LOG_OUTPUT_PATH):
-            print("### 실행 흐름 JSON 변경 감지 됨 => 그래프 최신화 시작")
+            print("### 실행 흐름 JSON 변경 감지 됨 => 그래프 최신화 시작\n")
             visualize_execution_flow()
 
 
