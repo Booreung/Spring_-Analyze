@@ -102,6 +102,7 @@ def stop_modules():
 def signal_handler(sig, frame):
     print("\n### Ctrl+C 감지 -> 모든 프로세스 종료")
     stop_modules()
+    print(f"⏹ http_sniffer 종료")
     mitmproxy_process.terminate()
     mitmproxy_process.wait()
 
