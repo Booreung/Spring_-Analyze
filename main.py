@@ -37,9 +37,19 @@ MODULES = {
     "web_dashboard": "web_dashboard\web_dashboard.py"
 }
 
-# mitmproxy 실행 명령어
+# 터미널 실행 명령어
 MITMPROXY_CMD_UI = ["mitmproxy", "--mode", "reverse:http://localhost:8082", "-p", "8080", "-s", "http_sniffer.py"]
+VISUALIZER_CMD = ["python","visualizer.py"]
 
+def start_visualizer():
+    print("### visualizer 실행 중...") 
+    process =  subprocess.Popen(
+        VISUALIZER_CMD,
+        creationflags=subprocess.CREATE_NEW_CONSOLE
+    )
+    time.sleep(2)
+
+    return process
 
 def start_mitmproxy():
     """ mitmproxy 실행 """
@@ -114,5 +124,6 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         signal_handler(None, None)
+        start_visualizer()
         mitmproxy_process.terminate()
         mitmproxy_process.wait()

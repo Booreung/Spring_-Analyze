@@ -130,7 +130,7 @@ class LogHandler(FileSystemEventHandler):
 
 
                 # 실행 흐름 시각화 갱신
-                subprocess.Popen([sys.executable, "visualizer.py"], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                #subprocess.Popen([sys.executable, "visualizer.py"], creationflags=subprocess.CREATE_NEW_CONSOLE)
                 
 
 

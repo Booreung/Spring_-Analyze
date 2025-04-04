@@ -1386,5 +1386,65 @@
                 "method": "retrieveLnAplcDscrCnt"
             }
         ]
+    },
+    {
+        "controller": {
+            "class": "efc.b.lo.bi.controller",
+            "function": "LnAplcController"
+        },
+        "service": null,
+        "dao": null,
+        "sql": [
+            {
+                "query_type": "SELECT",
+                "class": "Qblo200m_01DAO",
+                "method": "retrieveLnAplcList"
+            },
+            {
+                "query_type": "SELECT",
+                "class": "Qblo200m_01DAO",
+                "method": "retrieveLnAplcDscrCnt"
+            }
+        ]
+    },
+    {
+        "controller": {
+            "class": "efc.b.lo.bi.controller",
+            "function": "LnAplcController"
+        },
+        "service": null,
+        "dao": null,
+        "sql": [
+            {
+                "query_type": "SELECT",
+                "class": "Qblo200m_01DAO",
+                "method": "retrieveLnAplcList"
+            },
+            {
+                "query_type": "SELECT",
+                "class": "Qblo200m_01DAO",
+                "method": "retrieveLnAplcDscrCnt"
+            }
+        ]
+    },
+    {
+        "controller": {
+            "class": "efc.b.lo.bi.controller",
+            "function": "LnAplcController"
+        },
+        "service": null,
+        "dao": null,
+        "sql": [
+            {
+                "query_type": "SELECT",
+                "class": "Qblo200m_01DAO",
+                "method": "retrieveLnAplcList"
+            },
+            {
+                "query_type": "SELECT",
+                "class": "Qblo200m_01DAO",
+                "method": "test"
+            }
+        ]
     }
 ]

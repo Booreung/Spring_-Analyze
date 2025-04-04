@@ -11,10 +11,17 @@ import json
 import networkx as nx
 import matplotlib.pyplot as plt
 from graphviz import Digraph
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import os
+import time
 
 
 # 실행 흐름 데이터 파일 경로
 LOG_OUTPUT_PATH = "execution_flow.json"
+
+# 그래프 저장 경로
+GRAPH_OUTPUT_PATH = "execution_flow.png"
 
 
 # 실행 흐름 JSON 로드
@@ -81,14 +88,31 @@ def visualize_execution_flow():
     print(f"### 실행 흐름 그래프 저장 완료: {output_path}")
 
     # Matplotlib으로 이미지 출력
-    plt.imshow(plt.imread(output_path))
-    plt.axis("off")
-    plt.show()
+    # plt.imshow(plt.imread(output_path))
+    # plt.axis("off")
+    # plt.show()
+
+class JSONFileHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        if event.src_path.endswith(LOG_OUTPUT_PATH):
+            print("### 실행 흐름 JSON 변경 감지 됨 => 그래프 최신화 시작")
+            visualize_execution_flow()
 
 
 
 if __name__ == "__main__":
-    visualize_execution_flow()
+    print("### 실행 흐를 시각화 감시 시작")
+    event_handler = JSONFileHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path=os.path.dirname(os.path.abspath(LOG_OUTPUT_PATH)),recursive=False)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
         
 
