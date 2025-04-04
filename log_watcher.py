@@ -14,6 +14,9 @@ import re
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import json
+import threading
+import subprocess
+import sys
 
 # 로그 파일 경로
 LOG_FILE_PATH = "/efc_dev/logs/application.log"
@@ -55,6 +58,7 @@ def save_execution_flow(execution_flows):
 class LogHandler(FileSystemEventHandler):
     def __init__(self):
         self.last_position = 0  # 마지막으로 읽은 위치
+    
 
     def on_modified(self, event):
         if not event.is_directory and event.src_path.endswith("application.log"):
@@ -123,6 +127,11 @@ class LogHandler(FileSystemEventHandler):
             #실행 흐름 Json 저장
             if execution_flows:
                 save_execution_flow(execution_flows)
+
+
+                # 실행 흐름 시각화 갱신
+                subprocess.Popen([sys.executable, "visualizer.py"], creationflags=subprocess.CREATE_NEW_CONSOLE)
+                
 
 
 # 파일 감시 설정
