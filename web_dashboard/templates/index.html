@@ -19,12 +19,17 @@
             border: 1px solid #ddd;
             padding: 10px;
             max-width: 800px;
+            height: 400px;
+            overflow-y: auto;
+            background: #f9f9f9;
             margin-left: auto;
             margin-right: auto;
         }
         .flow-item {
             border-bottom: 1px solid #ddd;
             padding: 10px;
+            background: white;
+            margin-bottom: 5px;
         }
         .flow-item:last-child {
             border-bottom: none;
@@ -38,8 +43,15 @@
     </div>
 
     <script>
-        $(document).ready(function() {
+        let lastData = null;
+
+        function fetchExecutionFlow() {
             $.getJSON("/data", function(data) {
+                if (JSON.stringify(data) === JSON.stringify(lastData)) {
+                    return;  // 변경 사항 없으면 업데이트 안 함
+                }
+                lastData = data;
+
                 let container = $("#flow-container");
                 container.empty();
 
@@ -72,8 +84,16 @@
                     flowHtml += `</div>`;
                     container.append(flowHtml);
                 });
+            }).fail(function() {
+                console.error("데이터를 불러오는 중 오류 발생");
             });
-        });
+        }
+
+        // 5초마다 데이터 갱신
+        setInterval(fetchExecutionFlow, 10000);
+
+        // 페이지 로드 시 초기 데이터 가져오기
+        $(document).ready(fetchExecutionFlow);
     </script>
 </body>
 </html>

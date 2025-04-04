@@ -6,7 +6,8 @@
 from flask import Flask, render_template, jsonify
 import json
 import os
-
+import signal
+import sys
 
 app = Flask(__name__)
 
@@ -38,6 +39,11 @@ def get_execution_flow():
     return jsonify(data)
 
 
+def signal_handler(sig, frame):
+    print("\n ### 웹 대시보드 종료")
+    sys.exit(0)
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    signal.signal(signal.SIGINT, signal_handler)
+    app.run(debug=True, host="0.0.0.0", port=5000)

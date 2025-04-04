@@ -94,6 +94,9 @@ def stop_modules():
         print(f"⏹ {name} 종료")
         process.terminate()
         process.wait()
+    print(f"⏹ http_sniffer 종료")
+    mitmproxy_process.terminate()
+    mitmproxy_process.wait()
     print("### 모든 모듈이 정상 종료되었습니다.")
 
 
@@ -102,9 +105,6 @@ def stop_modules():
 def signal_handler(sig, frame):
     print("\n### Ctrl+C 감지 -> 모든 프로세스 종료")
     stop_modules()
-    print(f"⏹ http_sniffer 종료")
-    mitmproxy_process.terminate()
-    mitmproxy_process.wait()
 
     # 마지막 실행 그래프 생성 -> 프로그램 동작동안의 최종 결과물 출력
     print("### 최종 실행 흐름 그래프 생성 중...")
